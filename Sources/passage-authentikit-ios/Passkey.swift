@@ -3,12 +3,18 @@ import UIKit
 public class Passkey {
     
     private let organizationId: String
+    private let userDefaults = UserDefaults.standard
+    private let lastEvaluationKey = "lastEvaluationDate"
     
     init(organizationId: String) {
         self.organizationId = organizationId
     }
  
     public func evaluateReadiness() {
+        guard canEvaluateReadiness() else {
+            print("❌ Evaluate readiness can only be called once in 24 hours.")
+            return
+        }
         let device = UIDevice.current
         let deviceId = device.identifierForVendor?.uuidString ?? ""
         let supportsPassekeys = Utilities.deviceOSSupportsPasskeys
@@ -47,12 +53,24 @@ public class Passkey {
                     print("❌ Failed evaluate passkey readiness.")
                     return
                 }
+                updateLastEvaluationDate()
                 print("✅ Successfully evaluated passkey readiness.")
             } catch {
                 print("❌ Failed evaluate passkey readiness.")
             }
         }
         
+    }
+    
+    private func canEvaluateReadiness() -> Bool {
+        if let lastEvaluationDate = userDefaults.object(forKey: lastEvaluationKey) as? Date {
+            return Date().timeIntervalSince(lastEvaluationDate) > 24 * 60 * 60
+        }
+        return true
+    }
+    
+    private func updateLastEvaluationDate() {
+        userDefaults.set(Date(), forKey: lastEvaluationKey)
     }
     
 }
