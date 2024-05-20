@@ -2,62 +2,62 @@ import UIKit
 
 public class Passkey {
     
-    private let organizationId: String
+    private let clientSideKey: String
     private let userDefaults = UserDefaults.standard
     private let lastEvaluationKey = "lastEvaluationDate"
     
-    init(organizationId: String) {
-        self.organizationId = organizationId
+    init(clientSideKey: String) {
+        self.clientSideKey = clientSideKey
     }
  
-    public func evaluateReadiness() {
+    public func evaluateReadiness() async {
         guard canEvaluateReadiness() else {
             print("❌ Evaluate readiness can only be called once in 24 hours.")
             return
         }
-        let device = UIDevice.current
-        let deviceId = device.identifierForVendor?.uuidString ?? ""
-        let supportsPassekeys = Utilities.deviceOSSupportsPasskeys
-        let requestHeaders: [String : String] = [
+        let device = await UIDevice.current
+        let requestHeaders: [String : String] = await [
             "app_identifier": Bundle.main.bundleIdentifier ?? "",
             "device_os": device.systemName,
             "device_os_version": device.systemVersion,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Passage-Version": "Passage Authentikit iOS \(Authentikit.PACKAGE_VERSION)",
+            "X-API-KEY": clientSideKey,
         ]
+        let deviceId = await device.identifierForVendor?.uuidString ?? ""
+        let supportsPassekeys = Utilities.deviceOSSupportsPasskeys
         let requestBody: [String : Any] = [
-            "device_id": deviceId,
-            "security_key": supportsPassekeys,
-            "platform": supportsPassekeys,
             "cloud_synced": supportsPassekeys,
-            "cross_platform": supportsPassekeys,
             "conditional_ui": supportsPassekeys,
+            "cross_platform": supportsPassekeys,
+            "device_id": deviceId,
+            "platform": supportsPassekeys,
+            "security_key": supportsPassekeys,
         ]
-        let urlString = "\(Authentikit.BASE_PATH)/v1/organizations/\(organizationId)/analytics/passkey-readiness"
+        let urlString = "\(Authentikit.BASE_PATH)/v1/analytics/passkey-readiness"
         guard let url = URL(string: urlString) else {
             print("❌ Failed evaluate passkey readiness.")
             return
         }
-        Task {
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            for (key, value) in requestHeaders {
-                request.setValue(value, forHTTPHeaderField: key)
-            }
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-                request.httpBody = jsonData
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse,
-                      (200...299).contains(httpResponse.statusCode)
-                else {
-                    print("❌ Failed evaluate passkey readiness.")
-                    return
-                }
-                updateLastEvaluationDate()
-                print("✅ Successfully evaluated passkey readiness.")
-            } catch {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        for (key, value) in requestHeaders {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+            request.httpBody = jsonData
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode)
+            else {
                 print("❌ Failed evaluate passkey readiness.")
+                return
             }
+            updateLastEvaluationDate()
+            print("✅ Successfully evaluated passkey readiness.")
+        } catch {
+            print("❌ Failed evaluate passkey readiness.")
         }
         
     }
