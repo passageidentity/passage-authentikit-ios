@@ -4,7 +4,7 @@ public class Passkey {
     
     private let clientSideKey: String
     private let userDefaults = UserDefaults.standard
-    private let lastEvaluationKey = "lastEvaluationDate"
+    private static let LAST_EVALUATION_KEY = "LAST_EVALUATION_KEY"
     
     init(clientSideKey: String) {
         self.clientSideKey = clientSideKey
@@ -65,18 +65,18 @@ public class Passkey {
     }
     
     private func canEvaluateReadiness() -> Bool {
-        if let lastEvaluationDate = userDefaults.object(forKey: lastEvaluationKey) as? Date {
+        if let lastEvaluationDate = userDefaults.object(forKey: Passkey.LAST_EVALUATION_KEY) as? Date {
             return Date().timeIntervalSince(lastEvaluationDate) > 24 * 60 * 60
         }
         return true
     }
     
     private func updateLastEvaluationDate() {
-        userDefaults.set(Date(), forKey: lastEvaluationKey)
+        userDefaults.set(Date(), forKey: Passkey.LAST_EVALUATION_KEY)
     }
     
     internal func clearLastEvaluationDate() {
-        userDefaults.set(nil, forKey: lastEvaluationKey)
+        userDefaults.set(nil, forKey: Passkey.LAST_EVALUATION_KEY)
     }
     
 }
