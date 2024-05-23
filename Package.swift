@@ -4,21 +4,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "passage-authentikit-ios",
+    name: "Passage Authentikit",
     platforms: [.iOS(.v14), .macOS(.v10_13), .visionOS(.v1), .tvOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "passage-authentikit-ios",
-            targets: ["passage-authentikit-ios"]),
+            name: "Passage Authentikit",
+            targets: ["Authentikit"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "passage-authentikit-ios"),
+            name: "Authentikit"),
         .testTarget(
             name: "passage-authentikit-iosTests",
-            dependencies: ["passage-authentikit-ios"]),
+            dependencies: ["Authentikit"]),
     ]
 )
