@@ -4,7 +4,7 @@ public class Authentikit {
     
     public let passkey: Passkey
     
-    internal static let BASE_PATH = "https://auth-uat.passage.dev"
+    internal static var BASE_PATH = "https://auth.passage.id"
     internal static let PACKAGE_VERSION = "0.1.0"
     
     public init(clientSideKey: String) {

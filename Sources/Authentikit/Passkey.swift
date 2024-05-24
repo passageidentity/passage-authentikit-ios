@@ -4,22 +4,23 @@ public class Passkey {
     
     private let clientSideKey: String
     private let userDefaults = UserDefaults.standard
-    private let lastEvaluationKey = "lastEvaluationDate"
+    private static let LAST_EVALUATION_KEY = "LAST_EVALUATION_KEY"
     
     init(clientSideKey: String) {
         self.clientSideKey = clientSideKey
     }
  
-    public func evaluateReadiness() async {
+    public func evaluateReadiness() async throws {
         guard canEvaluateReadiness() else {
-            print("❌ Evaluate readiness can only be called once in 24 hours.")
             return
         }
         let device = await UIDevice.current
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
         let requestHeaders: [String : String] = await [
-            "app_identifier": Bundle.main.bundleIdentifier ?? "",
+            "app_identifier": bundleId,
             "device_os": device.systemName,
             "device_os_version": device.systemVersion,
+            "origin": bundleId,
             "Content-Type": "application/json",
             "Passage-Version": "Passage Authentikit iOS \(Authentikit.PACKAGE_VERSION)",
             "X-API-KEY": clientSideKey,
@@ -35,9 +36,11 @@ public class Passkey {
             "security_key": supportsPassekeys,
         ]
         let urlString = "\(Authentikit.BASE_PATH)/v1/analytics/passkey-readiness"
+        print(urlString)
+        print(requestHeaders)
+        print(requestBody)
         guard let url = URL(string: urlString) else {
-            print("❌ Failed evaluate passkey readiness.")
-            return
+            throw PasskeyEvaluationException("Could not initialize URL.")
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -47,30 +50,33 @@ public class Passkey {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: requestBody, options: [])
             request.httpBody = jsonData
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (_, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode)
             else {
-                print("❌ Failed evaluate passkey readiness.")
-                return
+                throw PasskeyEvaluationException("Network request failed.")
             }
             updateLastEvaluationDate()
-            print("✅ Successfully evaluated passkey readiness.")
+            return
         } catch {
-            print("❌ Failed evaluate passkey readiness.")
+            throw PasskeyEvaluationException(error.localizedDescription)
         }
         
     }
     
     private func canEvaluateReadiness() -> Bool {
-        if let lastEvaluationDate = userDefaults.object(forKey: lastEvaluationKey) as? Date {
+        if let lastEvaluationDate = userDefaults.object(forKey: Passkey.LAST_EVALUATION_KEY) as? Date {
             return Date().timeIntervalSince(lastEvaluationDate) > 24 * 60 * 60
         }
         return true
     }
     
     private func updateLastEvaluationDate() {
-        userDefaults.set(Date(), forKey: lastEvaluationKey)
+        userDefaults.set(Date(), forKey: Passkey.LAST_EVALUATION_KEY)
+    }
+    
+    internal func clearLastEvaluationDate() {
+        userDefaults.set(nil, forKey: Passkey.LAST_EVALUATION_KEY)
     }
     
 }
