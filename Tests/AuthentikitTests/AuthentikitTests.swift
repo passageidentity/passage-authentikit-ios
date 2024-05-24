@@ -3,7 +3,7 @@ import XCTest
 
 final class AuthentikitTests: XCTestCase {
     
-    static let VALID_KEY = "q2sff2MGjWzSOfMAW9fXODoi"
+    static let VALID_KEY = "PLACEHOLDER_VALID_KEY"
     static let INVALID_KEY = "INVALID_KEY"
     
     override class func setUp() {
