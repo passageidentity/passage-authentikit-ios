@@ -17,10 +17,10 @@ public class Passkey {
         let device = await UIDevice.current
         let bundleId = Bundle.main.bundleIdentifier ?? ""
         let requestHeaders: [String : String] = await [
-            "app_identifier": bundleId,
-            "device_os": device.systemName,
-            "device_os_version": device.systemVersion,
-            "origin": bundleId,
+            "App-Identifier": bundleId,
+            "Device-OS": device.systemName,
+            "Device-OS-Version": device.systemVersion,
+            "Origin": bundleId,
             "Content-Type": "application/json",
             "Passage-Version": "Passage Authentikit iOS \(Authentikit.PACKAGE_VERSION)",
             "X-API-KEY": clientSideKey,
