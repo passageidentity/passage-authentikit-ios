@@ -3,7 +3,7 @@
 ![SPM Version](https://img.shields.io/github/v/release/passageidentity/passage-authentikit-ios?style=flat&label=Swift%20Package)
 ![Cocoapods Version](https://img.shields.io/github/v/release/passageidentity/passage-authentikit-ios?style=flat&label=CocoaPods)
 ![Language](https://img.shields.io/badge/Swift-informational?style=flat&logo=swift&logoColor=white&color=FA7343)
-![License](https://img.shields.io/github/license/passageidentity/passage-flex-ios.svg?style=flat) ![Static Badge](https://img.shields.io/badge/Built_by_1Password-grey?logo=1password)
+![License](https://img.shields.io/github/license/passageidentity/passage-authentikit-ios.svg?style=flat) ![Static Badge](https://img.shields.io/badge/Built_by_1Password-grey?logo=1password)
 
 ## About
 
